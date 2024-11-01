@@ -1,0 +1,156 @@
+
+
+
+
+CREATE OR REPLACE TABLE `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.0k_2019_Q1` AS
+SELECT 
+    CAST(trip_id AS STRING) AS ride_id,                -- Convert trip_id to STRING and rename as ride_id
+    CAST(bikeid AS STRING) AS rideable_type,           -- Convert bikeid to STRING and rename as rideable_type
+    start_time AS started_at,                          -- Rename columns as needed
+    end_time AS ended_at,
+    from_station_name AS start_station_name,
+    from_station_id AS start_station_id,
+    to_station_name AS end_station_name,
+    to_station_id AS end_station_id,
+    usertype AS member_casual
+    
+
+FROM flowing-gasket-440008-g2.Cyclistic_Data_2019_20.Divvy_Trips_2019_Q1;
+
+
+
+
+CREATE OR REPLACE TABLE `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.0k_2020_Q1` AS
+SELECT 
+    ride_id,                   
+    rideable_type,
+    started_at,
+    ended_at,
+    start_station_name,
+    start_station_id,
+    end_station_name,
+    end_station_id,
+    member_casual
+    
+FROM 
+    `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.Divvy_Trips_2020_Q1`;  
+
+
+
+
+
+
+
+CREATE OR REPLACE TABLE `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_ok` AS  -- Replace with your project and dataset
+SELECT * FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.0k_2019_Q1`
+UNION ALL
+SELECT * FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.0k_2020_Q1`;
+
+
+
+-- Create a cleaned version of the combined_trips_ok table without NULL values
+CREATE OR REPLACE TABLE `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_cleaned` AS
+SELECT *
+FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_ok`
+WHERE 
+    ride_id IS NOT NULL
+    AND rideable_type IS NOT NULL
+    AND started_at IS NOT NULL
+    AND ended_at IS NOT NULL
+    AND start_station_name IS NOT NULL
+    AND start_station_id IS NOT NULL
+    AND end_station_name IS NOT NULL
+    AND end_station_id IS NOT NULL
+    AND member_casual IS NOT NULL;
+
+
+-- Create a new table with standardized 'member_casual' values
+CREATE OR REPLACE TABLE `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized` AS
+SELECT 
+    ride_id,
+    rideable_type,
+    started_at,
+    ended_at,
+    start_station_name,
+    start_station_id,
+    end_station_name,
+    end_station_id,
+    
+    -- Standardize values in member_casual column
+    CASE 
+        WHEN LOWER(member_casual) IN ('subscriber', 'member') THEN 'member'
+        WHEN LOWER(member_casual) IN ('customer', 'casual') THEN 'casual'
+        ELSE member_casual  -- Retain original value if it doesn't match (for validation)
+    END AS member_casual
+FROM 
+    `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_ok`;
+
+
+-- Count total rows
+SELECT COUNT(*) AS total_rows
+FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized`;
+
+-- Count distinct values for each column
+SELECT 
+    COUNT(DISTINCT ride_id) AS distinct_ride_ids,
+    COUNT(DISTINCT rideable_type) AS distinct_rideable_types,
+    COUNT(DISTINCT start_station_name) AS distinct_start_stations,
+    COUNT(DISTINCT end_station_name) AS distinct_end_stations,
+    COUNT(DISTINCT member_casual) AS distinct_member_casual
+FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized`;
+
+-- Check max, min, and mean values for ride_length
+SELECT 
+    MAX(TIMESTAMP_DIFF(ended_at, started_at, SECOND)) AS max_ride_length_seconds,
+    MIN(TIMESTAMP_DIFF(ended_at, started_at, SECOND)) AS min_ride_length_seconds,
+    AVG(TIMESTAMP_DIFF(ended_at, started_at, SECOND)) AS avg_ride_length_seconds
+FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized`;
+
+
+
+--Step 3: Create Summary Statistics
+-- Summary statistics by member type, its total rides, and avg ride
+SELECT 
+    member_casual,
+    COUNT(ride_id) AS total_rides,
+    AVG(TIMESTAMP_DIFF(ended_at, started_at, SECOND)) AS avg_ride_length_seconds
+FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized`
+GROUP BY member_casual;
+
+
+
+-- Summary statistics by day of the week
+SELECT 
+    FORMAT_TIMESTAMP('%A', started_at) AS day_of_week,
+    member_casual,
+    COUNT(ride_id) AS total_rides,
+    AVG(TIMESTAMP_DIFF(ended_at, started_at, SECOND)) AS avg_ride_length_seconds
+FROM 
+    `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized`
+GROUP BY 
+    day_of_week, member_casual
+ORDER BY member_casual,
+    CASE day_of_week
+        WHEN 'Monday' THEN 1
+        WHEN 'Tuesday' THEN 2
+        WHEN 'Wednesday' THEN 3
+        WHEN 'Thursday' THEN 4
+        WHEN 'Friday' THEN 5
+        WHEN 'Saturday' THEN 6
+        WHEN 'Sunday' THEN 7
+    END;
+
+
+
+
+
+    -- Save trends of rides by hour to a new table
+CREATE OR REPLACE TABLE `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.ride_trends_by_hour` AS
+SELECT 
+    EXTRACT(HOUR FROM started_at) AS hour_of_day,
+    member_casual,
+    COUNT(ride_id) AS total_rides,
+    AVG(TIMESTAMP_DIFF(ended_at, started_at, SECOND)) AS avg_ride_length_seconds
+FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized`
+GROUP BY hour_of_day, member_casual
+ORDER BY hour_of_day;

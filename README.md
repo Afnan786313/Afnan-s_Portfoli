@@ -175,3 +175,37 @@ ggplot(number_of_rides_data, aes(x = weekday, y = number_of_rides, fill = member
 ```
  ![Number of Rides by Day and Rider Type](no of rides each day of week.png)
 
+ 4. **Visualization of Average rides per day of week**
+```r
+# Create a summarized dataframe for average duration
+average_duration_data <- all_trips_v2 %>%
+    mutate(weekday = wday(started_at, label = TRUE)) %>%
+    group_by(member_casual, weekday) %>%
+    summarise(
+        number_of_rides = n(),
+        average_duration = mean(ride_length),
+        .groups = "drop"  # Drop groups after summarizing
+    ) %>%
+    arrange(member_casual, weekday)
+
+# Plot the average duration
+ggplot(average_duration_data, aes(x = weekday, y = average_duration, fill = member_casual)) +
+    geom_col(position = "dodge") +
+    labs(title = "Average Duration by Day and Rider Type",
+         x = "Day of the Week",
+         y = "Average Duration (seconds)") +
+    theme_minimal()
+```
+   ![Average Rides per day](Averagee rides per day.png)
+
+   ---
+## Step 5: Export Summary File for Further Analysis
+
+1. **Export the Data as CSV:**
+
+    ```r
+    counts <- aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual + all_trips_v2$day_of_week, FUN = mean)
+    write.csv(counts, file = 'avg_ride_length.csv')
+    ```
+
+

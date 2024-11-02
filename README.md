@@ -196,7 +196,7 @@ ggplot(average_duration_data, aes(x = weekday, y = average_duration, fill = memb
          y = "Average Duration (seconds)") +
     theme_minimal()
 ```
-   ![Average Rides per day](Averagee rides per day.png)
+   ![Average Rides per day](https://github.com/Afnan786313/Afnan-s_Portfolio/blob/ee71bf3f714fb78d752cc99def658a5687ca96d9/Pictures/Averagee%20rides%20per%20day.png)
 
    ---
 ## Step 5: Export Summary File for Further Analysis

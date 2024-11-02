@@ -173,7 +173,7 @@ ggplot(number_of_rides_data, aes(x = weekday, y = number_of_rides, fill = member
     theme_minimal()
 
 ```
- ![Number of Rides by Day and Rider Type](Pictures/no of rides each day of week_469x293.png)
+ ![Number of Rides by Day and Rider Type](https://github.com/Afnan786313/Afnan-s_Portfolio/blob/515619f202ca9230e82eef9d62046d1b20948070/Pictures/no%20of%20rides%20each%20day%20of%20week_469x293.png)
 
  4. **Visualization of Average rides per day of week**
 ```r

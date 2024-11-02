@@ -108,6 +108,7 @@ SELECT
     AVG(TIMESTAMP_DIFF(ended_at, started_at, SECOND)) AS avg_ride_length_seconds
 FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized`;
 ```
+![Statistics by Member Type](https://github.com/Afnan786313/Afnan-s_Portfolio/blob/67d5d8679ed39ad4d83f570dd274655d7d43e4a7/Pictures/Screenshot%20(10).png)
 
 ## 9. Summary Statistics by Member Type
 ```sql

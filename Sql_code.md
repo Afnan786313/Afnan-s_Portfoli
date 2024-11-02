@@ -63,7 +63,7 @@ WHERE
     AND member_casual IS NOT NULL;
 ```
 
-5. Standardize Member Type Values
+## 5. Standardize Member Type Values
 ```sql
 CREATE OR REPLACE TABLE `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized` AS
 SELECT 
@@ -83,13 +83,13 @@ SELECT
 FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_ok`;
 ```
 
-6. Count Total Rows
+## 6. Count Total Rows
 ```sql
 SELECT COUNT(*) AS total_rows
 FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized`;
 ```
 
-7. Count Distinct Values for Each Column
+## 7. Count Distinct Values for Each Column
 ```sql
 SELECT 
     COUNT(DISTINCT ride_id) AS distinct_ride_ids,
@@ -100,7 +100,7 @@ SELECT
 FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized`;
 ```
 
-8. Calculate Ride Length Statistics
+## 8. Calculate Ride Length Statistics
 ```sql
 SELECT 
     MAX(TIMESTAMP_DIFF(ended_at, started_at, SECOND)) AS max_ride_length_seconds,
@@ -109,9 +109,7 @@ SELECT
 FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized`;
 ```
 
-
-
-9. Summary Statistics by Member Type
+## 9. Summary Statistics by Member Type
 ```sql
 SELECT 
     member_casual,
@@ -120,7 +118,8 @@ SELECT
 FROM `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.combined_trips_standardized`
 GROUP BY member_casual;
 ```
-10. Summary Statistics by Day of the Week
+
+## 10. Summary Statistics by Day of the Week
 ```sql
 SELECT 
     FORMAT_TIMESTAMP('%A', started_at) AS day_of_week,
@@ -140,7 +139,8 @@ ORDER BY member_casual,
         WHEN 'Sunday' THEN 7
     END;
 ```
-11. Ride Trends by Hour
+
+## 11. Ride Trends by Hour
 ```sql
 CREATE OR REPLACE TABLE `flowing-gasket-440008-g2.Cyclistic_Data_2019_20.ride_trends_by_hour` AS
 SELECT 
